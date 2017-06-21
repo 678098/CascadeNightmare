@@ -30,3 +30,18 @@
 *.exe
 *.out
 *.app
+CascadeNightmare
+
+# Build
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+CMakeFiles/*
+
+# Misc
+*.png
+*.bmp
+*.jpg
+*.mov
+*.avi
+*.xml

@@ -3,9 +3,9 @@
 #include <opencv2/objdetect/objdetect.hpp>
 #include <algorithm>
 
-std::string cascadePath = "haarcascade_upperbody.xml";
-cv::Size minSize(22, 18);
-cv::Size maxSize(220, 180);
+std::string cascadePath = "lbpcascade_profileface.xml";
+cv::Size minSize(20, 34);
+cv::Size maxSize(200, 340);
 const int imw = 500;
 const int imh = 500;
 
@@ -80,6 +80,8 @@ public:
     {
         for (auto &c : creatures)
         {
+            if (c.counter >= 0)
+                continue;
             std::vector<cv::Rect> objs;
             cascade.detectMultiScale(c.image, objs, 1.1, 0, 0, minSize, maxSize);
             c.counter = objs.size();
@@ -96,23 +98,34 @@ public:
 class Evolution
 {
 public:
-    Evolution() : currentGeneration(20)
+    Evolution() : current(20)
     {
         cascade.load(cascadePath);
     }
 
     void run()
     {
+        int globalBestNum = -1;
+        int savedImages = 0;
         while (true){
-            currentGeneration.applyCascade(cascade);
-            cv::imwrite("_img" + std::to_string(currentGeneration.iteration) + ".png", currentGeneration.creatures[0].image);
-            std::cout << currentGeneration.creatures.front().counter << " " << currentGeneration.creatures.back().counter << std::endl;
-            currentGeneration = Generation(currentGeneration);
+            current.applyCascade(cascade);
+
+            int bestNum = current.creatures.front().counter;
+            int worstNum = current.creatures.back().counter;
+            std::cout << bestNum << " " << worstNum << std::endl;
+
+            if (bestNum > globalBestNum)
+            {
+                globalBestNum = bestNum;
+                cv::imwrite("_img" + std::to_string(savedImages++) + ".png", current.creatures[0].image);
+            }
+
+            current = Generation(current);
         }
     }
 
     cv::CascadeClassifier cascade;
-    Generation currentGeneration;
+    Generation current;
 };
 
 int main()
